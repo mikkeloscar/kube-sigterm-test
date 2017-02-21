@@ -1,0 +1,74 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "sigterm-test"
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        application: "sigterm-test"
+    spec:
+      containers:
+        - name: sigterm-test
+          image: mikkeloscar/sigterm-test:latest
+          # args:
+          #   - -keep-alive # set when testing not disabling keep-alives.
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /healthz?type=liveness
+              port: 8080
+            # timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /healthz?type=readiness
+              port: 8080
+              # scheme: HTTP
+            # failureThreshold: 2
+            # initialDelaySeconds: 2
+            # periodSeconds: 2
+            # successThreshold: 1
+            # timeoutSeconds: 1
+          # livenessProbe:
+            # failureThreshold: 3
+            # httpGet:
+            #   path: /healthz?type=liveness
+            #   port: 8080
+            #   scheme: HTTP
+            # initialDelaySeconds: 5
+            # periodSeconds: 10
+            # successThreshold: 1
+            # timeoutSeconds: 1
+            # # timeoutSeconds: 1
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: sigterm-test
+spec:
+  selector:
+    application: sigterm-test
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sigterm-test
+spec:
+  rules:
+  - host: myhost.example.org
+    http:
+      paths:
+      - backend:
+          serviceName: sigterm-test
+          servicePort: http
