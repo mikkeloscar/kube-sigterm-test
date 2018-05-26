@@ -35,10 +35,14 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var keepAlive bool
+var (
+	keepAlive      bool
+	sigtermTimeout time.Duration
+)
 
 func main() {
 	flag.BoolVar(&keepAlive, "keep-alive", false, "Don't disable keep-alives after SIGTERM.")
+	flag.DurationVar(&sigtermTimeout, "sigterm-timeout", 20*time.Second, "How long to wait after SIGTERM before terminating.")
 	flag.Parse()
 
 	sigTerm := make(chan os.Signal, 1)
@@ -63,6 +67,6 @@ func main() {
 		log.Println("SetKeepAlivesEnabled=false")
 		server.SetKeepAlivesEnabled(false)
 	}
-	time.Sleep(20 * time.Second)
+	time.Sleep(sigtermTimeout)
 	log.Println("exiting")
 }

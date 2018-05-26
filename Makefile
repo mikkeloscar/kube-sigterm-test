@@ -4,12 +4,9 @@ BINARY        ?= sigterm-test
 VERSION       ?= $(shell git describe --tags --always --dirty)
 IMAGE         ?= mikkeloscar/$(BINARY)
 TAG           ?= $(VERSION)
-GITHEAD       = $(shell git rev-parse --short HEAD)
-GITURL        = $(shell git config --get remote.origin.url)
-GITSTATUS     = $(shell git status --porcelain || echo "no changes")
 SOURCES       = $(shell find . -name '*.go')
 DOCKERFILE    ?= Dockerfile
-GOPKGS        = $(shell go list ./... | grep -v /vendor/)
+GOPKGS        = $(shell go list ./...)
 BUILD_FLAGS   ?= -v
 LDFLAGS       ?= -X main.version=$(VERSION) -w -s
 
